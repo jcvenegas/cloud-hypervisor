@@ -172,7 +172,9 @@ components:
       type: object
       properties:
         cpus:
-          $ref: '#/components/schemas/CpuConfig'
+          minimum: 1
+          default: 1
+          type: integer
         memory:
           $ref: '#/components/schemas/MemoryConfig'
         kernel:
@@ -213,22 +215,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/VhostUserBlkConfig'
-        vsock:
-          $ref: '#/components/schemas/VsockConfig'
+        vsocksss:
+          type: array
+          items:
+            $ref: '#/components/schemas/VsockConfig'
         iommu:
           type: boolean
           default: false
       description: Virtual machine configuration
-
-    CpuConfig:
-      required:
-      - cpu_count
-      type: object
-      properties:
-        cpu_count:
-          minimum: 1
-          default: 1
-          type: integer
 
     MemoryConfig:
       required:
