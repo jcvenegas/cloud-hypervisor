@@ -486,7 +486,7 @@ pub enum ConsoleOutputMode {
     Off,
     Tty,
     File,
-    Null,
+    None,
 }
 
 impl ConsoleOutputMode {
@@ -530,7 +530,7 @@ impl ConsoleConfig {
                     mode = ConsoleOutputMode::File;
                     file = Some(PathBuf::from(&param[5..]));
                 } else if param.starts_with("null") {
-                    mode = ConsoleOutputMode::Null;
+                    mode = ConsoleOutputMode::None;
                     file = None;
                 } else {
                     return Err(Error::ParseConsoleParam);
@@ -553,7 +553,7 @@ impl ConsoleConfig {
     pub fn default_serial() -> Self {
         ConsoleConfig {
             file: None,
-            mode: ConsoleOutputMode::Null,
+            mode: ConsoleOutputMode::None,
             iommu: false,
         }
     }

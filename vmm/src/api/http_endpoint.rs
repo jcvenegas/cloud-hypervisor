@@ -69,6 +69,7 @@ impl EndpointHandler for VmCreate {
             Method::Put => {
                 match &req.body {
                     Some(body) => {
+                        println!("New cerate request");
                         // Deserialize into a VmConfig
                         let vm_config: VmConfig = match serde_json::from_slice(body.raw())
                             .map_err(HttpError::SerdeJsonDeserialize)

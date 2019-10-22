@@ -340,7 +340,7 @@ impl DeviceManager {
                     .map_err(DeviceManagerError::SerialOutputFileOpen)?,
             )),
             ConsoleOutputMode::Tty => Some(Box::new(stdout())),
-            ConsoleOutputMode::Off | ConsoleOutputMode::Null => None,
+            ConsoleOutputMode::Off | ConsoleOutputMode::None => None,
         };
         let serial = if vm_info.vm_cfg.serial.mode != ConsoleOutputMode::Off {
             // Serial is tied to IRQ #4
@@ -418,7 +418,7 @@ impl DeviceManager {
                         .map_err(DeviceManagerError::ConsoleOutputFileOpen)?,
                 )),
                 ConsoleOutputMode::Tty => Some(Box::new(stdout())),
-                ConsoleOutputMode::Null => Some(Box::new(sink())),
+                ConsoleOutputMode::None => Some(Box::new(sink())),
                 ConsoleOutputMode::Off => None,
             };
         let (col, row) = get_win_size();
