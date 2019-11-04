@@ -105,12 +105,20 @@ pub struct VmInfo {
     pub state: VmState,
 }
 
+#[derive(Clone, Deserialize, Serialize)]
+pub struct VmmInfo {
+    pub version: String,
+}
+
 pub enum ApiResponsePayload {
     /// No data is sent on the channel.
     Empty,
 
     /// Virtual machine information
     VmInfo(VmInfo),
+
+    /// Vmm information
+    VmmInfo(VmmInfo),
 }
 
 /// This is the response sent by the VMM API server through the mpsc channel.
@@ -137,6 +145,9 @@ pub enum ApiRequest {
 
     /// Request the VM information.
     VmInfo(Sender<ApiResponse>),
+
+    /// Request the VMM information.
+    VmmInfo(Sender<ApiResponse>),
 
     /// Pause a VM.
     VmPause(Sender<ApiResponse>),
@@ -259,6 +270,22 @@ pub fn vm_info(api_evt: EventFd, api_sender: Sender<ApiRequest>) -> ApiResult<Vm
 
     match vm_info {
         ApiResponsePayload::VmInfo(info) => Ok(info),
+        _ => Err(ApiError::ResponsePayloadType),
+    }
+}
+
+pub fn vmm_info(api_evt: EventFd, api_sender: Sender<ApiRequest>) -> ApiResult<VmmInfo> {
+    let (response_sender, response_receiver) = channel();
+
+    api_sender
+        .send(ApiRequest::VmmInfo(response_sender))
+        .map_err(ApiError::RequestSend)?;
+    api_evt.write(1).map_err(ApiError::EventFdWrite)?;
+
+    let vmm_info = response_receiver.recv().map_err(ApiError::ResponseRecv)??;
+
+    match vmm_info {
+        ApiResponsePayload::VmmInfo(info) => Ok(info),
         _ => Err(ApiError::ResponsePayloadType),
     }
 }

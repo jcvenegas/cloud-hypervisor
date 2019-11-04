@@ -5,7 +5,7 @@
 
 use crate::api::http::EndpointHandler;
 use crate::api::{
-    vm_boot, vm_create, vm_delete, vm_info, vm_pause, vm_reboot, vm_resume, vm_shutdown,
+    vm_boot, vm_create, vm_delete, vm_info, vm_pause, vm_reboot, vm_resume, vm_shutdown, vmm_info,
     vmm_shutdown, ApiError, ApiRequest, ApiResult, VmAction, VmConfig,
 };
 use micro_http::{Body, Method, Request, Response, StatusCode, Version};
@@ -46,6 +46,9 @@ pub enum HttpError {
 
     /// Could not shut the VMM down
     VmmShutdown(ApiError),
+
+    /// Could not get VMM information
+    VmmInfo(ApiError),
 }
 
 fn error_response(error: HttpError, status: StatusCode) -> Response {
@@ -155,6 +158,32 @@ impl EndpointHandler for VmInfo {
     ) -> Response {
         match req.method() {
             Method::Get => match vm_info(api_notifier, api_sender).map_err(HttpError::VmInfo) {
+                Ok(info) => {
+                    let mut response = Response::new(Version::Http11, StatusCode::OK);
+                    let info_serialized = serde_json::to_string(&info).unwrap();
+
+                    response.set_body(Body::new(info_serialized));
+                    response
+                }
+                Err(e) => error_response(e, StatusCode::InternalServerError),
+            },
+            _ => Response::new(Version::Http11, StatusCode::BadRequest),
+        }
+    }
+}
+
+// /api/v1/vmm.info handler
+pub struct VmmInfo {}
+
+impl EndpointHandler for VmmInfo {
+    fn handle_request(
+        &self,
+        req: &Request,
+        api_notifier: EventFd,
+        api_sender: Sender<ApiRequest>,
+    ) -> Response {
+        match req.method() {
+            Method::Get => match vmm_info(api_notifier, api_sender).map_err(HttpError::VmmInfo) {
                 Ok(info) => {
                     let mut response = Response::new(Version::Http11, StatusCode::OK);
                     let info_serialized = serde_json::to_string(&info).unwrap();
