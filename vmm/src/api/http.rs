@@ -83,7 +83,9 @@ fn http_serve<T: Read + Write>(
         return;
     }
 
+    let mut handled = false;
     while let Some(request) = http_connection.pop_parsed_request() {
+        handled = true;
         let sender = api_sender.clone();
         let path = request.uri().get_abs_path().to_string();
         let mut response = match HTTP_ROUTES.routes.get(&path) {
@@ -97,6 +99,12 @@ fn http_serve<T: Read + Write>(
         response.set_server("Cloud Hypervisor API");
         response.set_content_type(MediaType::ApplicationJson);
         http_connection.enqueue_response(response);
+    }
+    if !handled {
+        let mut res = Response::new(Version::Http11, StatusCode::InternalServerError);
+        res.set_server("Cloud Hypervisor API");
+        res.set_content_type(MediaType::ApplicationJson);
+        http_connection.enqueue_response(res);
     }
 }
 
