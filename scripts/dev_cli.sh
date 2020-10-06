@@ -10,7 +10,7 @@ CTR_IMAGE_TAG="cloudhypervisor/dev"
 CTR_IMAGE_VERSION="latest"
 CTR_IMAGE="${CTR_IMAGE_TAG}:${CTR_IMAGE_VERSION}"
 
-DOCKER_RUNTIME="docker"
+DOCKER_RUNTIME="${DOCKER_RUNTIME:-docker}"
 
 # Host paths
 CLH_SCRIPTS_DIR=$(cd "$(dirname "$0")" && pwd)
